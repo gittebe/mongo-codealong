@@ -56,6 +56,38 @@ const app = express()
 app.use(cors())
 app.use(bodyParser.json())
 
+// Here comes the animal example from the codealong on disco
+// const mongoUrl = process.env.MONGO.URL || "mongodb://localhost/animals"
+// mongoose.connect(mongoUrl, {useNewUrlParser: true, useUnifiedTopology: true})
+// mongoose.Promise = Promise
+
+// const Animal = mongoose.model('Animal', {
+//   name: String,
+//   age: Number,
+//   isFurry: Boolean,
+// })
+
+// AnimationPlaybackEvent.deleteMany().then(() => {
+  // new Animal({name: 'Alfons', age: 2, isFurry: true}).save()
+// new Animal({name: 'Lucy', age: 5, isFurry: true}).save()
+// new Animal({name: 'Goldy the goldfish', age: 1, isFurry: false}).save()
+// })
+
+// Start defining your routes here
+// app.get('/', (req, res) => {
+//   AnimationPlaybackEvent.find().then(animals => {
+//     res.json(animals)
+//   })
+// })
+
+// addProposalSyntaxPlugins.get('/:name', (req, res) => {
+//   if(animal) {
+//     res.json(animal)
+//   } else {
+//     res.status(404).json({error: 'Not found'})
+//   }
+// })
+
 // Start defining your routes here
 app.get('/', (req, res) => {
   res.send('Hello World!')
