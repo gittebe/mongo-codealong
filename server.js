@@ -28,6 +28,9 @@ const Author = mongoose.model('Author', {
 
     const rowling = new Author({ name: 'J.K. Rowling' });
     await rowling.save();
+
+    const goethe = new Author({ name: 'J.W. Goethe' });
+    await goethe.save();
   };
 
   seedDatabase();
@@ -57,19 +60,21 @@ app.get('/authors', async (req, res) => {
   }
 });
 
-// Server starten
+//  start server
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });
 
 
-// // const Book = mongoose.model('Book', {
-// //   title: String,
-// //   author: {
-// //     type: mongoose.Schema.Types.ObjectId,
-// //     ref: 'Author'
-// //   }
-// // })
+// books
+
+const Book = mongoose.model('Book', {
+  title: String,
+  author: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Author'
+  }
+})
 
 //   //   await new Book({ title: "Harry Potter and the Philosopher's Stone", author: rowling }).save()
 //   //   await new Book({ title: "Harry Potter and the Chamber of Secrets", author: rowling }).save()
