@@ -17,11 +17,22 @@ const Author = mongoose.model('Author', {
   name: String
 });
 
+// here I associate the book model with the author model to avoid duplication
+const Book = mongoose.model('Book', {
+  title: String,
+  author: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Author'
+  }
+});
+
+
 // if (process.env.RESET_DATABASE) {
   console.log('Resetting database!');
 
   const seedDatabase = async () => {
     await Author.deleteMany();
+    // await Book.deleteMany();
 
     const tolkien = new Author({ name: 'J.R.R Tolkien' });
     await tolkien.save();
@@ -31,8 +42,17 @@ const Author = mongoose.model('Author', {
 
     const goethe = new Author({ name: 'J.W. Goethe' });
     await goethe.save();
-  };
 
+    await new Book({ title: "Harry Potter and the Philosopher's Stone", author: rowling }).save()
+    await new Book({ title: "Harry Potter and the Chamber of Secrets", author: rowling }).save()
+    await new Book({ title: "Harry Potter and the Prisoner of Azkaban", author: rowling }).save()
+    await new Book({ title: "Harry Potter and the Goblet of Fire", author: rowling }).save()
+    await new Book({ title: "Harry Potter and the Order of the Phoenix", author: rowling }).save()
+    await new Book({ title: "Harry Potter and the Half-Blood Prince", author: rowling }).save()
+    await new Book({ title: "Harry Potter and the Deathly Hallows", author: rowling }).save()
+    await new Book({ title: "The Lord of the Rings", author: tolkien }).save()
+    await new Book({ title: "The Hobbit", author: tolkien }).save()
+  }
   seedDatabase();
 // }
 
@@ -42,6 +62,14 @@ const app = express();
 // Middlewares for CORS and JSON-Parsing
 app.use(cors());
 app.use(bodyParser.json());
+
+app.use((req, res, next) => {
+if (mongoose.connection.readyState === 1){
+  next()
+} else {
+  res.status(503).json({error: 'Service unavailable'})
+}
+})
 
 // Start route
 app.get('/', (req, res) => {
@@ -60,62 +88,52 @@ app.get('/authors', async (req, res) => {
   }
 });
 
+app.get('/authors/:id/books', async (req, res) => {
+  const author = await Author.findById(req.params.id)
+  if (author) {
+    const books = await Book.find({ 
+      author: mongoose.Types.ObjectId.createFromHexString(author.id) 
+    }) 
+    res.json(books)
+  } else {
+    res.status(404).json({ error: 'Author not found' })
+  }
+})
+
+app.get('/authors/:id', async (req, res) => {
+  try {
+    const author = await Author.findById(req.params.id)
+  if (author) {
+    res.json(author)
+  } else {
+    res.status(404).json({ error: 'Author not found' })
+  } 
+  } catch (err) {
+    res.status(400).json({error:'invalid author id'})
+  }
+})
+
+// app.get('/books', async (req, res) => {
+//   const books = await Book.find().populate('author')
+//   res.json(books)
+// })
+
+
+app.get('/books', async (req, res) => {
+  try {
+     const books = await Book.find().populate('author');
+     console.log('Books with populated authors:', books); // Added logging
+     res.json(books);
+  } catch (error) {
+     console.error('Error retrieving books', error);
+     res.status(500).send('Server error');
+  }
+});
+
 //  start server
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });
-
-
-// books
-
-const Book = mongoose.model('Book', {
-  title: String,
-  author: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Author'
-  }
-})
-
-//   //   await new Book({ title: "Harry Potter and the Philosopher's Stone", author: rowling }).save()
-//   //   await new Book({ title: "Harry Potter and the Chamber of Secrets", author: rowling }).save()
-//   //   await new Book({ title: "Harry Potter and the Prisoner of Azkaban", author: rowling }).save()
-//   //   await new Book({ title: "Harry Potter and the Goblet of Fire", author: rowling }).save()
-//   //   await new Book({ title: "Harry Potter and the Order of the Phoenix", author: rowling }).save()
-//   //   await new Book({ title: "Harry Potter and the Half-Blood Prince", author: rowling }).save()
-//   //   await new Book({ title: "Harry Potter and the Deathly Hallows", author: rowling }).save()
-//   //   await new Book({ title: "The Lord of the Rings", author: tolkien }).save()
-//   //   await new Book({ title: "The Hobbit", author: tolkien }).save()
-//   }
-
-
-
-
-// // app.get('/authors/:id', async (req, res) => {
-// //   const author = await Author.findById(req.params.id)
-// //   if (author) {
-// //     res.json(author)
-// //   } else {
-// //     res.status(404).json({ error: 'Author not found' })
-// //   }
-// // })
-
-// // app.get('/authors/:id/books', async (req, res) => {
-// //   const author = await Author.findById(req.params.id)
-// //   if (author) {
-// //     const books = await Book.find({ 
-// //       author: mongoose.Types.ObjectId.createFromHexString(author.id) 
-// //     }) 
-// //     res.json(books)
-// //   } else {
-// //     res.status(404).json({ error: 'Author not found' })
-// //   }
-// // })
-
-// // app.get('/books', async (req, res) => {
-// //   const books = await Book.find().populate('author')
-// //   res.json(books)
-// // })
-
 
 
 
